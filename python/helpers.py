@@ -5,10 +5,15 @@ it has functions that use regular expressions to parse
 the text---not particularly interesting, topologically
 """
 
-import re # regular expression library
+import re  # regular expression library
+import json
+import itertools
+
 
 def getWindow(text, first, last):
     """
+    Return text in a specified window.
+
     Given a string and two regular expressions, return
     only the part of the text between the first instance of
     those expressions.  If nothing is found, return the original
@@ -17,7 +22,6 @@ def getWindow(text, first, last):
     str regex regex --> list<str>
     text first last --> [ text.find(first) ... text.find(last) ]
     """
-
     left = re.search(first, text)
     right = re.search(last, text)
 
@@ -31,11 +35,12 @@ def getWindow(text, first, last):
         print 'No left match was found'
         return text[:right.start()]
     else:
-        return text[left.end() : right.start()]
+        return text[left.end(): right.start()]
+
 
 def textSplitter(text, splitExp):
     """
-    Split the text and filer out empty lines
+    Split the text and filer out empty lines.
 
     str regex --> lst
     text regex --> text.split(regex)
@@ -43,9 +48,11 @@ def textSplitter(text, splitExp):
     textSplit = re.split(splitExp, text)
     return filter(lambda x: x != '', textSplit)
 
+
 def splitStanzas(index, book):
-    """
-    Split a book into stanzas
+    r"""
+    Split a book into stanzas.
+
     int str --> tup( str, lst<str>)
     index text --> ( index, text.split(\n\n) )
     """
@@ -63,3 +70,23 @@ def splitStanzas(index, book):
 
     # tuple( str(bookN), str_list(stanzas) )
     return (key, stanzas)
+
+
+def getNodes(lst):
+    """Get unique nodes from list of data"""
+    pairs = [ [x['pair'][0], x['pair'][1]] for x in lst]
+    items = list(itertools.chain.from_iterable(pairs))
+    return list(set(items))
+
+
+def writeToJSON(jsonData, inFile):
+    """Import a dict to json file."""
+    with open(inFile, 'w') as f:
+        json.dump(f, jsonData)
+
+
+def readJSON(readFile):
+    """Read JSON to dict."""
+    with open(readFile, 'r') as f:
+        data = json.read(f)
+    return data

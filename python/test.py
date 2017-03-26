@@ -1,5 +1,6 @@
 import metrics
 import crunchData
+import graphMaker
 
 def test_stanzaLen_metric():
     inputs = (
@@ -29,3 +30,20 @@ def test_make_distance_matrix():
     ]
 
     assert crunchData.makeDistMatrix(inputs, metrics.editDistance) == output
+
+def test_filter_by_epsilon():
+    inputPairs = [{'pair': (1, 2), 'dist': 2}, {'pair': (3, 5), 'dist': 6}]
+    inputEps = 4
+    output = [(1, 2)]
+    assert graphMaker.filterByEpsilon(inputPairs, inputEps) == output
+
+def test_make_graph():
+    inputPairs = [
+                {'pair': (1, 2), 'dist': 2},
+                {'pair': (3, 5), 'dist': 6},
+                {'pair': (2, 5), 'dist': 1}
+                ]
+    inputEps = 3
+    output = { '1': { '2': {}}, '3': {}, '5': {'2': {}}, '2': { '1': {}, '5': {}}}
+
+    assert graphMaker.makeEpsGraph(inputPairs, inputEps) == output
