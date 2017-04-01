@@ -78,6 +78,24 @@ def getNodes(lst):
     items = list(itertools.chain.from_iterable(pairs))
     return list(set(items))
 
+def getStepStats(arr, no_steps=100):
+    """Get stats for persistent homology calculation"""
+    distances = map(lambda x: x['dist'], arr)
+    minD, maxD = min(distances), max(distances)
+
+    step_size = (maxD - minD) / float(no_steps)
+
+    return {"start": max(minD-1, 0), "step_size": step_size, "no_steps": no_steps}
+
+
+def updateArrayEntry(arr, datum, upperRight=True):
+    pair = datum['pair']
+    row = pair[0] if upperRight else pair[1]
+    col = pair[1] if upperRight else pair[0]
+
+    arr[row][col] = datum['dist']
+    # no return, update in place
+
 
 def writeToJSON(jsonData, inFile):
     """Import a dict to json file."""

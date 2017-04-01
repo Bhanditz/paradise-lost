@@ -6,6 +6,8 @@ and exports it in the appropriate fashion.
 """
 
 import itertools as it
+import numpy as np
+import helpers
 
 
 def pairGetter(lst):
@@ -33,3 +35,24 @@ def makeDistMatrix(lst, metric):
     distMatrix = [{'pair': p, 'dist': metric(lstPair(p))} for p in allPairs]
 
     return distMatrix
+
+def pairsToText(lst, initialEps=0, step=1, no_steps=100, maxDim=2):
+    """
+    Take the distance matrix and make it a numpy array.
+    """
+    dim = len(helpers.getNodes(lst))
+    arr = np.zeros((dim, dim))
+
+    for elmt in lst:
+        helpers.updateArrayEntry(arr, elmt)
+        helpers.updateArrayEntry(arr, elmt, False)
+
+    # map each row to a string
+    strLst = map(lambda r: reduce(lambda x, y: "{} {}".format(x, y), r), arr)
+    persHomConfig = helpers.getStepStats(lst, no_steps)
+
+    persHomConfig['matrix'] = strLst,
+    persHomConfig['size'] = str(arr.shape[0])
+    persHomConfig['max_dim'] = maxDim
+
+    return persHomConfig
