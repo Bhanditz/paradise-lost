@@ -72,6 +72,10 @@ def splitStanzas(index, book):
     return (key, stanzas)
 
 
+def flattenListOnce(lst):
+    return list(itertools.chain(*lst))
+
+
 def getNodes(lst):
     """Get unique nodes from list of data"""
     pairs = [ [x['pair'][0], x['pair'][1]] for x in lst]

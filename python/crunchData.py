@@ -36,7 +36,7 @@ def makeDistMatrix(lst, metric):
 
     return distMatrix
 
-def pairsToText(lst, initialEps=0, step=1, no_steps=100, maxDim=2):
+def pairsToText(lst, no_steps=100, maxDim=3):
     """
     Take the distance matrix and make it a numpy array.
     """
