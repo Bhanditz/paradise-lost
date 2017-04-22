@@ -21,15 +21,16 @@ def reduceStanzasToList(stDict):
     return flatStanzas
 
 
-def windowSampler(data, nSamp, winLen=4):
+def sampleByWindow(stDict, nSamp, winLen=1):
     '''
     Randomly pick windows of stanzas in the book
     (Note that this may pick windows of overlapping chapters)
     '''
+    stanzaList = reduceStanzasToList(stDict)
     # keep index of samples
     sampleIndex = []
     # [0 ... dataLength - windowSize]
-    dataIndex = range(len(data) - winLen)
+    dataIndex = range(len(stanzaList) - winLen)
 
     # go until you have enough samples
     while len(sampleIndex) < nSamp:
@@ -46,7 +47,7 @@ def windowSampler(data, nSamp, winLen=4):
         sampleIndex = sampleIndex + newWindow
 
     # [ indices of samples ] --> [ corresponding stanzas ]
-    sampleStanzas = [data[x] for x in sampleIndex]
+    sampleStanzas = [stanzaList[x] for x in sampleIndex]
     return sampleStanzas
 
 def numberOfLines(stanzaList):
@@ -75,7 +76,7 @@ def sampleByWeight(stDict, nSamp):
     # get weights
     weightedBooks = weightBooks(stDict)
     # sample based on weight
-    getSampleNo = lambda w: int(nSamp * w)
+    getSampleNo = lambda w: int(nSamp * w) + 1
     sampleBooks = map(lambda b: random.sample(b['stanzas'], getSampleNo(b['weight'])), weightedBooks)
     # return list of sampled stanzas
     stanzaList = hlp.flattenListOnce(sampleBooks)
