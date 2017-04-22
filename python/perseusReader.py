@@ -1,6 +1,17 @@
 import re
 import os
 import helpers as hlp
+import json
+
+def writePerseusInputFile(config, filename):
+    c = config
+    perseusFileString = '{}\n{} {} {} {}\n{}'.format(c['size'], c['start'], c['step_size'], c['no_steps'], c['max_dim'], c['matrix'])
+    with open(filename, 'w') as outFile:
+        outFile.write(perseusFileString)
+
+def writePerseusOutput(inFilename, prefix):
+    shellCommand = '../perseusMac distmat {} {}'.format(inFilename, prefix)
+    os.system(shellCommand)
 
 def parsePerseusString(str):
     """convert 'num num'-->[num num]"""

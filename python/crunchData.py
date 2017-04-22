@@ -36,9 +36,10 @@ def makeDistMatrix(lst, metric):
 
     return distMatrix
 
-def pairsToText(lst, no_steps=100, maxDim=3):
+def matrixToPerseusConfig(lst, no_steps=100, maxDim=2):
     """
-    Take the distance matrix and make it a numpy array.
+    Take the distance matrix and make it a numpy array...
+    return the Perseus configuration
     """
     dim = len(helpers.getNodes(lst))
     arr = np.zeros((dim, dim))
@@ -49,10 +50,14 @@ def pairsToText(lst, no_steps=100, maxDim=3):
 
     # map each row to a string
     strLst = map(lambda r: reduce(lambda x, y: "{} {}".format(x, y), r), arr)
+    # combine rows into one string
+    matrixStr = reduce(lambda x, y: '{}\n{}'.format(x, y), strLst[0])
+
+    # matrix --> { start, step_size, no_steps }
     persHomConfig = helpers.getStepStats(lst, no_steps)
 
-    persHomConfig['matrix'] = strLst,
+    persHomConfig['matrix'] = matrixStr,
     persHomConfig['size'] = str(arr.shape[0])
     persHomConfig['max_dim'] = maxDim
-
+    # {size, start, step_size, no_steps, max_dim, matrix}
     return persHomConfig
