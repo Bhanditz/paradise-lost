@@ -20,7 +20,7 @@ METRICS = {
 # (sampler key, metric key)
 PAIRS = [(sKey, mKey) for sKey in SAMPLERS for mKey in METRICS]
 
-def writeMetricData(perseusFilePrefix='sample_metric'):
+def getPersistenceData(perseusFilePrefix='sample_metric'):
     """
     Assuming a sample has already been taken, uses the metric to calculate:
         matrix = array of pair/distance information
@@ -41,3 +41,6 @@ def writeMetricData(perseusFilePrefix='sample_metric'):
     inFilename = '{}/INPUT.txt'.format(perseusFilePrefix)
     perseusReader.writePerseusInputFile(perseusConfig, inFilename)
     perseusReader.writePerseusOutput(inFilename, perseusFilePrefix)
+
+    # return persistent homology list
+    return perseusReader.compilePerseusOutput(perseusFilePrefix)

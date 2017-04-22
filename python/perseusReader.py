@@ -10,7 +10,7 @@ def writePerseusInputFile(config, filename):
         outFile.write(perseusFileString)
 
 def writePerseusOutput(inFilename, prefix):
-    shellCommand = '../perseusMac distmat {} {}'.format(inFilename, prefix)
+    shellCommand = '../perseusMac distmat {} {}/output'.format(inFilename, prefix)
     os.system(shellCommand)
 
 def parsePerseusString(str):
@@ -47,13 +47,16 @@ def compilePerseusOutput(directory):
     """Extract persistence data from all perseus output files in a directory"""
 
     # directory --> [ output_i.txt ]
-    outputFiles = filter(lambda f: d != 'input.txt', os.listdir(directory))
-
+    outputFilter = lambda f: bool(re.match('output_\d\.txt', f))
+    outputFiles = filter(outputFilter, os.listdir(directory))
+    outputPaths = map(lambda f: '{}/{}'.format(directory, f), outputFiles)
     # [ output_i.txt ] --> [ [homology data i] ]
-    outputData = map(convertOutputFile, outputFiles)
+    outputData = map(convertOutputFile, outputPaths)
+    persData = filter(lambda r: r != "NO_GENERATORS", outputData)
 
     # [ [homology data i] ] --> [ flat homology data ]
-    flatData = hlp.flattenListOnce(outputData)
+    flatData = hlp.flattenListOnce(persData)
 
     # remove empty homologies
-    return filter(lambda r: r != "NO_GENERATORS", flatData)
+    # [ {generator, dimension, birth, death} ]
+    return flatData
