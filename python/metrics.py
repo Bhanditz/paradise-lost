@@ -31,7 +31,7 @@ def getTokenSet(word, option='list'):
 
 def jaccardDistance(pair):
     ## Split strings by word/punctuation
-    wordPair = map(getTokenSet, pair)
+    wordPair = map(lambda p: getTokenSet(p, 'set'), pair)
     return jaccard_distance(wordPair[0], wordPair[1])
 
 def syllableLen(word):
