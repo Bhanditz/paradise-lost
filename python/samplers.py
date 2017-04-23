@@ -21,34 +21,37 @@ def reduceStanzasToList(stDict):
     return flatStanzas
 
 
-def sampleByWindow(stDict, nSamp, winLen=1):
+def sampleByWindow(opts):
     '''
     Randomly pick windows of stanzas in the book
     (Note that this may pick windows of overlapping chapters)
     '''
-    stanzaList = reduceStanzasToList(stDict)
-    # keep index of samples
-    sampleIndex = []
-    # [0 ... dataLength - windowSize]
-    dataIndex = range(len(stanzaList) - winLen)
+    nSamp, winLen = opts['nSamp'], opts['winLen']
+    def makeSample(stDict):
+        stanzaList = reduceStanzasToList(stDict)
+        # keep index of samples
+        sampleIndex = []
+        # [0 ... dataLength - windowSize]
+        dataIndex = range(len(stanzaList) - winLen)
 
-    # go until you have enough samples
-    while len(sampleIndex) < nSamp:
-        # get diff so that we know which samples haven't been taken
-        sampleSet = set(sampleIndex)
-        setDiff = [x for x in dataIndex if x not in sampleSet]
-        # pick a sample we haven't taken yet
-        newIndex = random.choice(setDiff)
+        # go until you have enough samples
+        while len(sampleIndex) < nSamp:
+            # get diff so that we know which samples haven't been taken
+            sampleSet = set(sampleIndex)
+            setDiff = [x for x in dataIndex if x not in sampleSet]
+            # pick a sample we haven't taken yet
+            newIndex = random.choice(setDiff)
 
-        # pick sample + the following stanzas
-        newWindow = [newIndex + j for j in range(winLen)]
+            # pick sample + the following stanzas
+            newWindow = [newIndex + j for j in range(winLen)]
 
-        # add new samples to main list
-        sampleIndex = sampleIndex + newWindow
+            # add new samples to main list
+            sampleIndex = sampleIndex + newWindow
 
-    # [ indices of samples ] --> [ corresponding stanzas ]
-    sampleStanzas = [stanzaList[x] for x in sampleIndex]
-    return sampleStanzas
+        # [ indices of samples ] --> [ corresponding stanzas ]
+        sampleStanzas = [stanzaList[x] for x in sampleIndex]
+        return sampleStanzas
+    return makeSample
 
 def numberOfLines(stanzaList):
     # [ stanza ] --> [ number of lines in stanza ]
@@ -72,12 +75,15 @@ def weightBooks(stDict):
     return booksWithWeights
 
 
-def sampleByWeight(stDict, nSamp):
-    # get weights
-    weightedBooks = weightBooks(stDict)
-    # sample based on weight
-    getSampleNo = lambda w: int(nSamp * w) + 1
-    sampleBooks = map(lambda b: random.sample(b['stanzas'], getSampleNo(b['weight'])), weightedBooks)
-    # return list of sampled stanzas
-    stanzaList = hlp.flattenListOnce(sampleBooks)
-    return stanzaList
+def sampleByWeight(opts):
+    nSamp = opts['nSamp']
+    def makeSample(stDict):
+        # get weights
+        weightedBooks = weightBooks(stDict)
+        # sample based on weight
+        getSampleNo = lambda w: int(nSamp * w) + 1
+        sampleBooks = map(lambda b: random.sample(b['stanzas'], getSampleNo(b['weight'])), weightedBooks)
+        # return list of sampled stanzas
+        stanzaList = hlp.flattenListOnce(sampleBooks)
+        return stanzaList
+    return makeSample

@@ -36,6 +36,7 @@ def makeDistMatrix(lst, metric):
 
     return distMatrix
 
+
 def matrixToPerseusConfig(lst, no_steps=100, maxDim=2):
     """
     Take the distance matrix and make it a numpy array...
