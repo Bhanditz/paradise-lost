@@ -9,9 +9,17 @@ import json
 ### --------------------------------------------------- GLOBAL VARIABLES BEGIN
 
 # TODO inlcude options in samplers
+SAMPLE_NUMBER = 20
+
 SAMPLERS = {
-    'windowSample': samplers.sampleByWindow,
-    'weightedSample': samplers.sampleByWeight
+    'windowSample': {
+        'fcn': samplers.sampleByWindow,
+        'opts': { 'nSamp': SAMPLE_NUMBER, 'winLen': 4}
+    },
+    'weightedSample': {
+        'fcn': samplers.sampleByWeight,
+        'opts': { 'nSamp': SAMPLE_NUMBER }
+    }
 }
 
 METRICS = {
@@ -29,7 +37,7 @@ with open('paradise-lost.json', 'r') as popFile:
 ### --------------------------------------------------- GLOBAL VARIABLES END
 
 
-def getPersistenceData(perseusFilePrefix='sample_metric'):
+def getPersistenceData(directory):
     """
     Assuming a sample has already been taken, uses the metric to calculate:
         matrix = array of pair/distance information
@@ -38,45 +46,57 @@ def getPersistenceData(perseusFilePrefix='sample_metric'):
     It returns a list with the persistent homology data
     """
     # read in matrix from MATRIX.json
-    matrixPath = '{}/matrix.json'.format(perseusFilePrefix)
+    matrixPath = '{}/matrix.json'.format(directory)
     with open(matrixPath, 'r') as matrixFile:
         readData = json.load(matrixFile)
-    matrix = readData['result']
+    matrix = readData
     # needs number of steps and max dimension
     # matrix, config --> { str(matrix), size of matrix, config.max_dim }
     perseusConfig = crunchData.matrixToPerseusConfig(matrix)
 
     # write perseus config to INPUT, then run perseus
-    inFilename = '{}/input.txt'.format(perseusFilePrefix)
+    inFilename = '{}/input.txt'.format(directory)
     perseusReader.writePerseusInputFile(perseusConfig, inFilename)
-    perseusReader.writePerseusOutput(inFilename, perseusFilePrefix)
+    perseusReader.writePerseusOutput(inFilename, directory)
 
     # return persistent homology list
-    return perseusReader.compilePerseusOutput(perseusFilePrefix)
+    return perseusReader.compilePerseusOutput(directory)
 
 # TODO make sure this works
-def finalOutput(directory):
+def finalOutput(samplerKey, metricKey, prefix='perseusData/test'):
     """
     extract data for final export:
         persistenceData,
         sampleStanzas,
         sampleGraph
     """
+
+    directory = '{}/{}/{}'.format(prefix, samplerKey, metricKey)
     # get persistence data <list>
     persistenceData = getPersistenceData(directory)
 
     # get sample <list>
-    samplePath = '{}/sample.json'.format(directory)
+    samplePath = '{}/{}/sample.json'.format(prefix, samplerKey)
     with open(samplePath, 'r') as sampleFile:
-        readSample = json.load(sampleFile)
-    sampleStanzas = readSample
+        sampleStanzas = json.load(sampleFile)
+
+    # get matrix <list>
+    matrixPath = '{}/{}/{}/matrix.json'.format(prefix, samplerKey, metricKey)
+    with open(matrixPath, 'r') as matrixFile:
+        distMatrix = json.load(matrixFile)
 
     # TODO put in graph functionality
     # put them all in one object
     dataJSON = {
         'persistenceData': persistenceData,
-        'sampleStanzas': sampleStanzas
+        'sampleStanzas': sampleStanzas,
+        'matrix': distMatrix
     }
+
+    # write data to index.json
+    indexPath = '{}/index.json'.format(directory)
+    with open(indexPath, 'w') as indexFile:
+        json.dump(dataJSON, indexFile)
 
     return dataJSON
 
@@ -91,6 +111,7 @@ def makeSample(pop, sampler, opts, directory):
     # return sample
     return sampleData
 
+
 def makeMatrix(sampleData, metric, directory):
     """calculate distribution matrix given a metric and sample data"""
     # calculate sample and matrix
@@ -99,3 +120,21 @@ def makeMatrix(sampleData, metric, directory):
     matrixPath = '{}/matrix.json'.format(directory)
     with open(matrixPath, 'w') as matrixFile:
         json.dump(matrix, matrixFile)
+
+def runSampleComputation(pop, samplerKey, metricKey, directory):
+    """collect sample and calculate ditribution matrix"""
+    samplerFcn, samplerOpts = SAMPLERS[samplerKey]['fcn'], SAMPLERS[samplerKey]['opts']
+    metricFcn = METRICS[metricKey]
+    # get sample and write to file
+    samplePath = '{}/{}'.format(directory, samplerKey)
+    sampleData = makeSample(pop, samplerFcn, samplerOpts, samplePath)
+    # write matrix to file
+    matrixPath = '{}/{}/{}'.format(directory, samplerKey, metricKey)
+    makeMatrix(sampleData, metricFcn, matrixPath)
+
+
+def sampleThenPerseus(pop, samplerKey, metricKey, directory):
+    # write sample + matrix to file, return path to matrix
+    runSampleComputation(pop, samplerKey, metricKey, directory)
+    # output data
+    allData = finalOutput(samplerKey, metricKey)
