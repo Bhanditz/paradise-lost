@@ -2,6 +2,7 @@ import metrics
 import samplers
 import crunchData
 import perseusReader
+import helpers as hlp
 
 import os
 import json
@@ -149,3 +150,16 @@ def sampleAll(outputDir):
             matrixPath = '{}/{}/{}'.format(outputDir, samplerKey, metricKey)
             makeMatrix(sampleData, metricFcn, matrixPath)
             finalOutput(samplerKey, metricKey)
+
+
+def compileJSON(outputDir):
+    JSON = dict()
+    # compile master JSON
+    for samplerKey in SAMPLERS:
+        JSON[samplerKey] = dict()
+        for metricKey in METRICS:
+            jsonPath = '{}/{}/{}/index.json'.format(outputDir, samplerKey, metricKey)
+            JSON[samplerKey][metricKey] = hlp.readJSON(jsonPath)
+    # write to file
+    outputFile = '{}/index.json'.format(outputDir)
+    hlp.writeToJSON(JSON, outputFile)

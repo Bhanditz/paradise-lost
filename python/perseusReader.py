@@ -5,7 +5,9 @@ import json
 
 def writePerseusInputFile(config, filename):
     c = config
-    perseusFileString = '{}\n{} {} {} {}\n{}'.format(c['size'], c['start'], c['step_size'], c['no_steps'], c['max_dim'], c['matrix'])
+    # I don't know why this is the case, but c['matrix'] is a tuple
+    matrix = c['matrix'][0]
+    perseusFileString = '{}\n{} {} {} {}\n{}'.format(c['size'], c['start'], c['step_size'], c['no_steps'], c['max_dim'], matrix)
     with open(filename, 'w') as outFile:
         outFile.write(perseusFileString)
 

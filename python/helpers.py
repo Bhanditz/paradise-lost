@@ -104,11 +104,11 @@ def updateArrayEntry(arr, datum, upperRight=True):
 def writeToJSON(jsonData, inFile):
     """Import a dict to json file."""
     with open(inFile, 'w') as f:
-        json.dump(f, jsonData)
+        json.dump(jsonData, f)
 
 
 def readJSON(readFile):
     """Read JSON to dict."""
     with open(readFile, 'r') as f:
-        data = json.read(f)
+        data = json.load(f)
     return data

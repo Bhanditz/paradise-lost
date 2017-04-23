@@ -52,8 +52,9 @@ def matrixToPerseusConfig(lst, no_steps=100, maxDim=2):
     # map each row to a string
     strLst = map(lambda r: reduce(lambda x, y: "{} {}".format(x, y), r), arr)
     # combine rows into one string
-    matrixStr = reduce(lambda x, y: '{}\n{}'.format(x, y), strLst[0])
-
+    print type(strLst)
+    matrixStr = reduce(lambda x, y: '{}\n{}'.format(x, y), strLst)
+    print type(matrixStr)
     # matrix --> { start, step_size, no_steps }
     persHomConfig = helpers.getStepStats(lst, no_steps)
 
