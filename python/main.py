@@ -9,7 +9,7 @@ import json
 ### --------------------------------------------------- GLOBAL VARIABLES BEGIN
 
 # TODO inlcude options in samplers
-SAMPLE_NUMBER = 20
+SAMPLE_NUMBER = 5
 
 SAMPLERS = {
     'windowSample': {
@@ -121,7 +121,7 @@ def makeMatrix(sampleData, metric, directory):
     with open(matrixPath, 'w') as matrixFile:
         json.dump(matrix, matrixFile)
 
-def runSampleComputation(pop, samplerKey, metricKey, directory):
+def runSingleSampleComputation(pop, samplerKey, metricKey, directory):
     """collect sample and calculate ditribution matrix"""
     samplerFcn, samplerOpts = SAMPLERS[samplerKey]['fcn'], SAMPLERS[samplerKey]['opts']
     metricFcn = METRICS[metricKey]
@@ -135,6 +135,17 @@ def runSampleComputation(pop, samplerKey, metricKey, directory):
 
 def sampleThenPerseus(pop, samplerKey, metricKey, directory):
     # write sample + matrix to file, return path to matrix
-    runSampleComputation(pop, samplerKey, metricKey, directory)
+    runSingleSampleComputation(pop, samplerKey, metricKey, directory)
     # output data
     allData = finalOutput(samplerKey, metricKey)
+
+def sampleAll(outputDir):
+    for samplerKey in SAMPLERS:
+        samplerFcn, samplerOpts = SAMPLERS[samplerKey]['fcn'], SAMPLERS[samplerKey]['opts']
+        samplerPath = '{}/{}'.format(outputDir, samplerKey)
+        sampleData = makeSample(POPULATION, samplerFcn, samplerOpts, samplerPath)
+        for metricKey in METRICS:
+            metricFcn = METRICS[metricKey]
+            matrixPath = '{}/{}/{}'.format(outputDir, samplerKey, metricKey)
+            makeMatrix(sampleData, metricFcn, matrixPath)
+            finalOutput(samplerKey, metricKey)
