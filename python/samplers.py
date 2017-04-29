@@ -81,8 +81,13 @@ def sampleByWeight(opts):
         # get weights
         weightedBooks = weightBooks(stDict)
         # sample based on weight
-        getSampleNo = lambda w: int(nSamp * w) + 1
-        sampleBooks = map(lambda b: random.sample(b['stanzas'], getSampleNo(b['weight'])), weightedBooks)
+        #getSampleNo = lambda w: int(nSamp * w)
+        def getSampleNo(b):
+            samples = int(nSamp * b['weight'])
+            pop = len(b['stanzas'])
+            return min(samples, pop)
+
+    sampleBooks = map(lambda b: random.sample(b['stanzas'], getSampleNo(b)), weightedBooks)
         # return list of sampled stanzas
         stanzaList = hlp.flattenListOnce(sampleBooks)
         return stanzaList
